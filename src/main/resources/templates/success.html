@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:insert="~{common/header.html :: header}"></div>
+    <h1>User List</h1>
+  <div th:switch="${students}">
+        <table th:if="${students.size()!=0}">
+            <tr>
+                <th>
+                    Student Id
+                </th>
+                <th>
+                    Student Name
+                </th>
+                <th>
+                    Student Email
+                </th>
+            </tr>
+            <tr th:each="student:${students}">
+                <td th:text ="${student.studentId}"></td>
+                <td th:text ="${student.studentName}"></td>
+                <td th:text="${student.studentEmail}"></td>
+            </tr>
+        </table>
+
+  </div>
+<span th:unless="${students.size()!=0}">No UserLists</span>
+<a th:href="@{/}">Home</a>
+<div th:insert="~{common/footer.html :: footer}"></div>
+</body>
+</html>
