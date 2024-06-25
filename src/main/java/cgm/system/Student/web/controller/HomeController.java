@@ -1,12 +1,13 @@
 package cgm.system.Student.web.controller;
 
-import cgm.system.Student.bl.service.StudentService;
-import cgm.system.Student.persistance.dao.StudentDAO;
-import cgm.system.Student.persistance.entity.Student;
-import cgm.system.Student.web.form.StudentForm;
+import cgm.system.Student.bl.service.EmployeeService;
+import cgm.system.Student.persistance.dao.EmployeeDAO;
+import cgm.system.Student.persistance.entity.Employee;
+import cgm.system.Student.web.form.EmployeeForm;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -15,69 +16,41 @@ import java.util.List;
 @Controller
 public class HomeController {
     @Autowired
-    private StudentService studentService;
+    private EmployeeService employeeService;
 
     @Autowired
-    public StudentDAO studentDAO;
-
-    @RequestMapping(value="/", method = RequestMethod.GET)
-    public String goTOHomePage(){
-        return "home";
+    public EmployeeDAO employeeDAO;
+    
+    @RequestMapping(value="/")
+    public String viewHomePage(Model model) {
+        model.addAttribute("listEmployees", employeeDAO.findAll());
+        return "index";
     }
 
-    @RequestMapping(value="/register",method = RequestMethod.GET)
-    public ModelAndView goToRegisterPage(){
-        StudentForm studentForm = new StudentForm();
-        ModelAndView model = new ModelAndView("register");
-        model.addObject("studentForm",studentForm);
-        return model;
+    @GetMapping("/showNewEmployeeForm")
+    public String showNewEmployeeForm(Model model) {
+        Employee employee = new Employee();
+        model.addAttribute("employee", employee);
+        return "new_employee";
     }
 
-    @PostMapping(value="/success")
-    public ModelAndView saveUserList(@ModelAttribute("studentForm") StudentForm studentForm){
-        ModelAndView model = new ModelAndView("insert");
-        this.studentService.doSaveStudent(studentForm);
-        return model;
+    @PostMapping("/saveEmployee")
+    public String saveEmployee(@ModelAttribute("employee") EmployeeForm employeeForm) {
+        employeeService.doSaveEmployee(employeeForm);
+        return "redirect:/";
     }
 
-    @RequestMapping(value="/userList",method = RequestMethod.GET)
-    public ModelAndView showUserList(){
-        ModelAndView model = new ModelAndView("success");
-        List<Student> studentList = studentDAO.findAll();
-        model.addObject ("students",studentList);
-        return model;
+    @GetMapping("/showFormForUpdate/{id}")
+    public String showFormForUpdate(@PathVariable(value = "id") long id, Model model) {
+        Employee employee = employeeService.getEmployeeById(id);
+        model.addAttribute("employee", employee);
+        return "update_employee";
     }
 
-
-    @RequestMapping(value="/update",method = RequestMethod.GET)
-    public ModelAndView goToUpdatePage(@ModelAttribute StudentForm updateForm){
-        ModelAndView model = new ModelAndView("update");
-        model.addObject("updateForm",updateForm);
-        return model;
+    @GetMapping("/deleteEmployee/{id}")
+    public String deleteEmployee(@PathVariable(value = "id") long id) {
+        employeeService.deleteEmployee(id);
+        return "redirect:/";
     }
-
-    @PostMapping(value="/update-success")
-    public ModelAndView updateUserList(@ModelAttribute("updateForm") StudentForm updateForm){
-        ModelAndView model = new ModelAndView("update-success");
-        this.studentService.doUpdateStudent(updateForm);
-        return model;
-    }
-
-    @RequestMapping(value="/delete",method = RequestMethod.GET)
-    public ModelAndView goToDeletePage(@ModelAttribute StudentForm deleteForm){
-        ModelAndView model = new ModelAndView("delete");
-        model.addObject("deleteForm",deleteForm);
-        return model;
-    }
-
-    @PostMapping(value="/delete-success-ornot")
-    public String deleteUserList(@ModelAttribute("deleteForm") StudentForm deleteForm){
-        if (this.studentService.doDeleteStudent(deleteForm)) {
-            return "/delete-Success";
-        } else {
-            return "/delete-Error";
-        }
-    }
-
 
 }
